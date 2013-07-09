@@ -16,50 +16,6 @@ However, it can easily be extended to set up more complicated Form processes
 and run them in python.
 
 
-EXAMPLE
-   <------------------------ ext.frm ---------------------->
-	#-
-	off statistics;
-	off finalstats;
-
-	#ifndef `PIPES_'
-		#message "This program must be called from within python."
-		#terminate
-	#endif
-	#setexternal `PIPE1_'
-
-	#toexternal "abcd\n"
-	#fromexternal
-
-	Symbols abcd, dcba;
-
-	Local F = abcd;
-	Identify abcd = `abcd';
-
-	Print;
-	.sort
-	#toexternal "DONE\n"
-	.end
-   <------------------------ EOF -------------------------->
-
-	>>> pipe = FormPipe("ext.frm", formargs=["-q"])
-	>>> line = pipe.readLine()
-	>>> while line != "DONE\n":
-	...    name = line.strip()
-	...    lst = [ch for ch in name]
-	...    lst.reverse()
-	...    value = "".join(lst)
-	...    pipe.write("#define %s \"%s\"\n\n" % (name, value))
-	>>> while pipe.poll() is None:
-	...    pass
-	>>> if pipe.poll() != 0:
-	...    print "FORM failed!"
-	>>> pipe.close()
-
-   F =
-	      dcba;
-
-
 REFERENCES
 	M. Tentyukov and J.A.M. Vermaseren,
 	``Extension of the functionality of
