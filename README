@@ -1,0 +1,72 @@
+v0.9
+
+Implementation of a Python interface to the
+computer algebra system Form.
+
+form.py was started by Thomas Reiter and
+developed by Gavin Cullen
+
+This module contains a class for communication with a
+FORM process through its external channels.
+
+For it to work you need the .txt file 
+'template.frm' kicking around. This allows one to set up the form process.
+In general how it works is that for every command a simple form process is setup.
+However, it can easily be extended to set up more complicated Form processes
+and run them in python.
+
+
+EXAMPLE
+   <------------------------ ext.frm ---------------------->
+	#-
+	off statistics;
+	off finalstats;
+
+	#ifndef `PIPES_'
+		#message "This program must be called from within python."
+		#terminate
+	#endif
+	#setexternal `PIPE1_'
+
+	#toexternal "abcd\n"
+	#fromexternal
+
+	Symbols abcd, dcba;
+
+	Local F = abcd;
+	Identify abcd = `abcd';
+
+	Print;
+	.sort
+	#toexternal "DONE\n"
+	.end
+   <------------------------ EOF -------------------------->
+
+	>>> pipe = FormPipe("ext.frm", formargs=["-q"])
+	>>> line = pipe.readLine()
+	>>> while line != "DONE\n":
+	...    name = line.strip()
+	...    lst = [ch for ch in name]
+	...    lst.reverse()
+	...    value = "".join(lst)
+	...    pipe.write("#define %s \"%s\"\n\n" % (name, value))
+	>>> while pipe.poll() is None:
+	...    pass
+	>>> if pipe.poll() != 0:
+	...    print "FORM failed!"
+	>>> pipe.close()
+
+   F =
+	      dcba;
+
+
+REFERENCES
+	M. Tentyukov and J.A.M. Vermaseren,
+	``Extension of the functionality of
+	  the symbolic program FORM by external
+     software,''
+	Comput. Phys. Commun. 176, 385 (2007)
+	[arXiv:cs/0604052].
+
+
+
